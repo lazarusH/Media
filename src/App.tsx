@@ -64,9 +64,9 @@ const App = () => (
     <Sonner />
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<PublicRoute><Index /></PublicRoute>} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicParameter>} />
           
           {/* User Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />

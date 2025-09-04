@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [officeName, setOfficeName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export default function Login() {
     setLoading(true);
     setError('');
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(officeName, password);
 
     if (error) {
       setError('የማስገቢያ መረጃ ትክክል አይደለም። እባክዎ እንደገና ይሞክሩ።');

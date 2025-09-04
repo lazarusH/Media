@@ -18,7 +18,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (officeName: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -85,7 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (officeName: string, password: string) => {
+    // Generate email from office name for Supabase auth
+    const email = `${officeName.toLowerCase().replace(/\s+/g, '')}@akaki.gov.et`;
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
