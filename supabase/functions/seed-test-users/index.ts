@@ -37,6 +37,41 @@ serve(async (req) => {
 
     const admin = createClient(SUPABASE_URL, serviceRoleKey);
 
+    // Check if this is a dynamic user creation request
+    const body = await req.json().catch(() => null);
+    
+    if (body && body.officeName) {
+      // Dynamic user creation
+      console.log('Creating dynamic user:', body);
+      
+      const email = await officeToEmail(body.officeName);
+      const user = await createOrGetUser(email, body.password, body.officeName, body.role);
+      const userId = user?.id;
+      
+      if (!userId) throw new Error("No user id returned");
+
+      const { error: upsertErr } = await admin
+        .from("profiles")
+        .upsert(
+          {
+            user_id: userId,
+            office_name: body.officeName,
+            role: body.role,
+          },
+          { onConflict: "user_id" }
+        );
+      if (upsertErr) throw upsertErr;
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          user: { office_name: body.officeName, email, id: userId } 
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Default seed behavior - create preset test users
     const seeds = [
       {
         office_name: "የኮሙኒኬሽን ጽህፈት ቤት",

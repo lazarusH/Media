@@ -29,37 +29,29 @@ export default function CreateUser() {
     setError('');
 
     try {
-      // Generate email from office name for Supabase auth
-      const generatedEmail = `${formData.officeName.toLowerCase().replace(/\s+/g, '')}@akaki.gov.et`;
-      
-      // Create the user with Supabase Auth
-      const { data, error: signUpError } = await supabase.auth.admin.createUser({
-        email: generatedEmail,
-        password: formData.password,
-        user_metadata: {
-          office_name: formData.officeName,
+      // Call the seed-test-users function to create a user
+      const { data, error } = await supabase.functions.invoke('seed-test-users', {
+        body: {
+          officeName: formData.officeName,
+          password: formData.password,
           role: formData.role
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (error) throw error;
 
-      if (data.user) {
-        // Create profile entry
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: data.user.id,
-            office_name: formData.officeName,
-            role: formData.role
-          });
-
-        if (profileError) throw profileError;
-      }
+      console.log('User creation response:', data);
 
       toast({
         title: 'ተሳክቷል!',
         description: `${formData.officeName} በተሳካ ሁኔታ ተፈጥሯል።`,
+      });
+
+      // Reset form
+      setFormData({
+        officeName: '',
+        password: '',
+        role: 'office'
       });
 
       navigate('/admin/users');
