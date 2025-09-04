@@ -98,6 +98,9 @@ export default function RequestForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="coverageDate">ሽፋን የሚሰጥበት ቀን</Label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    ምሳሌ: ወር፣ ቀን፣ አመተ ምህረት (በኢትዮጵያ ዘመን አቆጣጠር)
+                  </p>
                   <Input
                     id="coverageDate"
                     name="coverageDate"
@@ -111,6 +114,9 @@ export default function RequestForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="coverageTime">ሰአት</Label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    ምሳሌ: ሰአት፣ ደቂቃ፣ ጥዋት/ከሰአት/ማታ
+                  </p>
                   <Input
                     id="coverageTime"
                     name="coverageTime"

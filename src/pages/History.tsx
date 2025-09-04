@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Clock, CheckCircle, XCircle, Calendar, MapPin, FileText } from 'lucide-react';
+import { formatCompleteEthiopianDate, formatEthiopianTime } from '@/utils/ethiopianCalendar';
 
 interface MediaRequest {
   id: string;
@@ -178,7 +179,7 @@ export default function History() {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {formatDate(request.coverage_date)} - {formatTime(request.coverage_time)}
+                        ሽፋን የሚሰጥበት ቀን: {formatCompleteEthiopianDate(request.coverage_date)} - {formatEthiopianTime(request.coverage_time)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -204,10 +205,10 @@ export default function History() {
                   )}
 
                   <div className="text-xs text-muted-foreground pt-2 border-t">
-                    ተላከ: {formatDate(request.created_at)}
+                    ተላከ: {formatCompleteEthiopianDate(request.created_at)}
                     {request.reviewed_at && (
                       <span className="ml-4">
-                        ተመለከተ: {formatDate(request.reviewed_at)}
+                        ተመለከተ: {formatCompleteEthiopianDate(request.reviewed_at)}
                       </span>
                     )}
                   </div>

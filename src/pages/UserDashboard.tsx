@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { FileText, Clock, CheckCircle, XCircle, Bell } from 'lucide-react';
 
 interface Stats {
   totalRequests: number;
@@ -23,13 +24,49 @@ export default function UserDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
       fetchStats();
+      setupRealtimeSubscription();
     }
   }, [user]);
+
+  const setupRealtimeSubscription = () => {
+    const channel = supabase
+      .channel('user-dashboard-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'media_requests',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          console.log('Request update:', payload);
+          // Refresh stats
+          fetchStats();
+          
+          // Show notification for status changes
+          if (payload.eventType === 'UPDATE' && payload.new.status !== payload.old?.status) {
+            const statusText = payload.new.status === 'approved' ? 'ተቀባይነት አግኝቷል' : 
+                              payload.new.status === 'rejected' ? 'ውድቅ ሆኗል' : 'ተለውጧል';
+            toast({
+              title: 'ሁኔታ ተለውጧል',
+              description: `የሚዲያ ሽፋን ጥያቄዎ ${statusText}`,
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 
   const fetchStats = async () => {
     try {

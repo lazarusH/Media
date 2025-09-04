@@ -1,23 +1,31 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Calendar } from 'lucide-react';
+import { Users, Calendar, Eye, Bell } from 'lucide-react';
+import { formatCompleteEthiopianDate } from '@/utils/ethiopianCalendar';
+import { useToast } from '@/hooks/use-toast';
 
 interface Profile {
   id: string;
   office_name: string;
+  role: string;
   created_at: string;
   user_id: string;
 }
 
 export default function AdminUsers() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUsers();
+    setupRealtimeSubscription();
   }, []);
 
   const fetchUsers = async () => {
@@ -25,24 +33,55 @@ export default function AdminUsers() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'office')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setProfiles(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast({
+        title: 'ስህተት',
+        description: 'ተጠቃሚዎችን በማምጣት ላይ ችግር ተፈጥሮአል',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('am-ET', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const setupRealtimeSubscription = () => {
+    const channel = supabase
+      .channel('admin-users-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          console.log('Profile update:', payload);
+          // Refresh the users list
+          fetchUsers();
+          
+          // Show notification for new users
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: 'አዲስ ተጠቃሚ',
+              description: `${payload.new.office_name} ተቀላቅሏል`,
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const handleViewDetails = (userId: string) => {
+    navigate(`/admin/users/${userId}`);
   };
 
   return (
@@ -69,11 +108,25 @@ export default function AdminUsers() {
                     {profile.office_name}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    ተቀላቀለ: {formatDate(profile.created_at)}
+                    ተቀላቀለ: {formatCompleteEthiopianDate(profile.created_at)}
                   </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'}>
+                      {profile.role === 'admin' ? 'አስተዳዳሪ' : 'ጽህፈት ቤት'}
+                    </Badge>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => handleViewDetails(profile.user_id)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    ዝርዝር ይመልከቱ
+                  </Button>
                 </CardContent>
               </Card>
             ))}
