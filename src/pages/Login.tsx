@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Login() {
   const [officeName, setOfficeName] = useState('');
@@ -17,6 +18,10 @@ export default function Login() {
 
   const { signIn } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.functions.invoke('seed-test-users').catch((e) => console.warn('Seed failed', e?.message || e));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
