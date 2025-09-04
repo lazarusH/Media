@@ -38,11 +38,18 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary-glow/10 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/lovable-uploads/69e823ba-1d77-4469-ad68-c01b1a28cf2b.png" 
+              alt="የአካኪ ቃሊቲ ንዑስ ከተማ አስተዳደር" 
+              className="h-24 w-24"
+            />
+          </div>
           <CardTitle className="text-2xl font-bold text-center">
-            መግቢያ
+            ወደ ስርዓቱ ገባ
           </CardTitle>
           <CardDescription className="text-center">
-            የሚድያ ሽፋን አስተዳደር ሲስተም
+            የሚድያ ሽፋን አስተዳደር ስርዓት
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -54,13 +61,13 @@ export default function Login() {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">ኢሜይል አድራሻ</Label>
+              <Label htmlFor="officeName">የጽህፈት ቤት ስም</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="የኢሜይል አድራሻዎን ያስገቡ"
+                id="officeName"
+                type="text"
+                value={officeName}
+                onChange={(e) => setOfficeName(e.target.value)}
+                placeholder="የጽህፈት ቤት ስም ያስገቡ"
                 required
                 disabled={loading}
               />

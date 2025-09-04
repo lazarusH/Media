@@ -36,7 +36,12 @@ export function Layout({ children }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo and Title */}
-            <div className="flex items-center">
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/lovable-uploads/69e823ba-1d77-4469-ad68-c01b1a28cf2b.png" 
+                alt="Logo" 
+                className="h-10 w-10"
+              />
               <h1 className="text-xl font-bold text-primary-foreground">
                 የሚድያ ሽፋን አስተዳደር
               </h1>

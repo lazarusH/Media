@@ -14,7 +14,6 @@ import { Loader2, UserPlus } from 'lucide-react';
 export default function CreateUser() {
   const [formData, setFormData] = useState({
     officeName: '',
-    email: '',
     password: '',
     role: 'office' as 'admin' | 'office'
   });
@@ -30,9 +29,12 @@ export default function CreateUser() {
     setError('');
 
     try {
+      // Generate email from office name for Supabase auth
+      const generatedEmail = `${formData.officeName.toLowerCase().replace(/\s+/g, '')}@akaki.gov.et`;
+      
       // Create the user with Supabase Auth
       const { data, error: signUpError } = await supabase.auth.admin.createUser({
-        email: formData.email,
+        email: generatedEmail,
         password: formData.password,
         user_metadata: {
           office_name: formData.officeName,
@@ -115,20 +117,6 @@ export default function CreateUser() {
                   value={formData.officeName}
                   onChange={handleInputChange}
                   placeholder="የጽህፈት ቤቱ ስም ያስገቡ"
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">ኢሜይል አድራሻ</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="example@email.com"
                   required
                   disabled={loading}
                 />
