@@ -9,6 +9,17 @@ const corsHeaders = {
 
 const SUPABASE_URL = "https://unhhxjrflgovwsnczynh.supabase.co";
 
+async function officeToEmail(officeName: string): Promise<string> {
+  const normalized = officeName.trim().toLowerCase();
+  const data = new TextEncoder().encode(normalized);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  const hex = Array.from(new Uint8Array(hash))
+    .slice(0, 10) // 10 bytes -> 20 hex chars
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `u-${hex}@akaki.gov.et`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,16 +37,14 @@ serve(async (req) => {
 
     const admin = createClient(SUPABASE_URL, serviceRoleKey);
 
-    const users = [
+    const seeds = [
       {
         office_name: "የኮሙኒኬሽን ጽህፈት ቤት",
-        email: "የኮሙኒኬሽንጽህፈትቤት@akaki.gov.et".toLowerCase(),
         password: "admin123",
         role: "admin" as const,
       },
       {
         office_name: "የከተማ ጽህፈት ቤት",
-        email: "የከተማጽህፈትቤት@akaki.gov.et".toLowerCase(),
         password: "office123",
         role: "office" as const,
       },
@@ -54,28 +63,26 @@ serve(async (req) => {
       }
     }
 
-    async function createOrGetUser(user: typeof users[number]) {
-      const existing = await findUserByEmail(user.email);
+    async function createOrGetUser(email: string, password: string, office_name: string, role: "admin" | "office") {
+      const existing = await findUserByEmail(email);
       if (existing) return existing;
 
       const { data, error } = await admin.auth.admin.createUser({
-        email: user.email,
-        password: user.password,
+        email,
+        password,
         email_confirm: true,
-        user_metadata: {
-          office_name: user.office_name,
-          role: user.role,
-        },
+        user_metadata: { office_name, role },
       });
       if (error) throw error;
       return data.user;
     }
 
-    const results = [] as Array<{ email: string; id: string | undefined; ok: boolean; error?: string }>;
+    const results: Array<{ office_name: string; email: string; id?: string; ok: boolean; error?: string }> = [];
 
-    for (const u of users) {
+    for (const s of seeds) {
       try {
-        const user = await createOrGetUser(u);
+        const email = await officeToEmail(s.office_name);
+        const user = await createOrGetUser(email, s.password, s.office_name, s.role);
         const userId = user?.id;
         if (!userId) throw new Error("No user id returned");
 
@@ -84,17 +91,18 @@ serve(async (req) => {
           .upsert(
             {
               user_id: userId,
-              office_name: u.office_name,
-              role: u.role,
+              office_name: s.office_name,
+              role: s.role,
             },
             { onConflict: "user_id" }
           );
         if (upsertErr) throw upsertErr;
 
-        results.push({ email: u.email, id: userId, ok: true });
+        results.push({ office_name: s.office_name, email, id: userId, ok: true });
       } catch (e: any) {
-        console.error("Seeding user failed", u.email, e?.message || e);
-        results.push({ email: u.email, id: undefined, ok: false, error: e?.message || String(e) });
+        console.error("Seeding user failed", s.office_name, e?.message || e);
+        const email = await officeToEmail(s.office_name).catch(() => "");
+        results.push({ office_name: s.office_name, email, ok: false, error: e?.message || String(e) });
       }
     }
 

@@ -86,15 +86,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (officeName: string, password: string) => {
-    // Generate email from office name for Supabase auth
-    const email = `${officeName.toLowerCase().replace(/\s+/g, '')}@akaki.gov.et`;
+    // Generate deterministic ASCII email from office name using SHA-256 (first 20 hex chars)
+    const normalized = officeName.trim().toLowerCase();
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(normalized));
+    const hex = Array.from(new Uint8Array(buf)).slice(0, 10).map(b => b.toString(16).padStart(2,'0')).join('');
+    const email = `u-${hex}@akaki.gov.et`;
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     return { error };
   };
-
   const signOut = async () => {
     await supabase.auth.signOut();
   };
