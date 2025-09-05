@@ -58,10 +58,10 @@ export function Layout({ children }: LayoutProps) {
                 className="w-8 h-8 object-contain"
               />
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">Media Coverage</h1>
-              <p className="text-xs text-gray-500">Management System</p>
-            </div>
+                                    <div>
+                          <h1 className="text-lg font-bold text-gray-900">የሚድያ ሽፋን</h1>
+                          <p className="text-xs text-gray-500">ጥየቃ ሲስተም</p>
+                        </div>
           </div>
           <Button
             variant="ghost"

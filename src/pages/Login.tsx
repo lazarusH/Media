@@ -174,7 +174,7 @@ export default function Login() {
                 alt="Web Icon" 
                 className="h-5 w-5 opacity-60"
               />
-              <span className="text-sm">Media Coverage System</span>
+              <span className="text-sm">የሚድያ ሽፋን ጥየቃ ሲስተም</span>
             </div>
           </div>
         </div>

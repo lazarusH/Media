@@ -6,5 +6,5 @@
     </linearGradient>
   </defs>
   <circle cx="50" cy="50" r="48" fill="url(#grad1)"/>
-  <text x="50" y="60" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="white">MC</text>
+  <text x="50" y="60" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">የሚድያ</text>
 </svg>

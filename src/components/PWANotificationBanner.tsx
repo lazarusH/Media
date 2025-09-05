@@ -85,7 +85,7 @@ export function PWANotificationBanner() {
     const spacer = document.getElementById('pwa-banner-spacer');
     if (spacer) {
       if (showBanner && !isInstalled) {
-        spacer.className = 'h-12 transition-all duration-300'; // Adjust height as needed
+        spacer.className = 'h-16 transition-all duration-300'; // Increased height for better spacing
       } else {
         spacer.className = 'h-0 transition-all duration-300';
       }
@@ -153,11 +153,11 @@ export function PWANotificationBanner() {
               id="installBtn"
               onClick={handleInstallClick}
               size="sm"
-              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              className="bg-white/90 hover:bg-white text-gray-900 border-white/50 shadow-lg hover:shadow-xl transition-all duration-200 font-medium px-4 py-2 rounded-lg"
               style={{ display: 'none' }}
             >
-              <Download className="w-4 h-4 mr-1" />
-              ጨመር
+              <Download className="w-4 h-4 mr-2" />
+              <span className="font-semibold">Add to Home Screen</span>
             </Button>
             <Button
               onClick={handleDismiss}
