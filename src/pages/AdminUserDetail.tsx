@@ -72,7 +72,7 @@ export default function AdminUserDetail() {
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'approved':
+      case 'accepted':
         return 'default';
       case 'rejected':
         return 'destructive';
@@ -85,7 +85,7 @@ export default function AdminUserDetail() {
     switch (status) {
       case 'pending':
         return 'በመጠባበቅ ላይ';
-      case 'approved':
+      case 'accepted':
         return 'ተቀባይነት አግኝቷል';
       case 'rejected':
         return 'ውድቅ ሆኗል';
@@ -194,7 +194,7 @@ export default function AdminUserDetail() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  {requests.filter(r => r.status === 'approved').length}
+                  {requests.filter(r => r.status === 'accepted').length}
                 </div>
                 <div className="text-sm text-muted-foreground">ተቀባይነት ያገኙ</div>
               </div>

@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, MapPin, Clock, Eye, Check, X, Loader2 } from 'lucide-react';
+import { formatCompleteEthiopianDate, formatEthiopianTime } from '@/utils/ethiopianCalendar';
 
 interface MediaRequest {
   id: string;
@@ -169,19 +170,13 @@ export default function AdminRequests() {
     }
   };
 
+  // Using Ethiopian calendar formatting
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('am-ET', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    return formatCompleteEthiopianDate(dateString);
   };
 
   const formatTime = (timeString: string) => {
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('am-ET', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatEthiopianTime(timeString);
   };
 
   const pendingRequests = requests.filter(r => r.status === 'pending');

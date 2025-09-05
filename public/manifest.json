@@ -2,25 +2,48 @@
   "name": "የሚድያ ሽፋን አስተዳደር",
   "short_name": "የሚድያ ሽፋን",
   "description": "የሚድያ ሽፋን ጥያቄዎችን ለማስተዳደር የተዘጋጀ ስርዓት",
-  "theme_color": "#1e40af",
+  "theme_color": "#1d6daa",
   "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
   "start_url": "/",
+  "id": "/",
+  "lang": "am",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["productivity", "business"]
+  "categories": ["productivity", "business"],
+  "screenshots": [
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
 }

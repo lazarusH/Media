@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
-import { LogOut, Menu, Bell } from 'lucide-react';
+import { LogOut, Menu, Bell, X, Home, FileText, Users, BarChart3, Plus, History, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -10,7 +11,8 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const { profile, signOut, isAdmin } = useAuth();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { pendingCount } = useNotifications();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -20,112 +22,176 @@ export function Layout({ children }: LayoutProps) {
   };
 
   const navigationItems = isAdmin ? [
-    { name: 'ዳሽቦርድ', path: '/admin', icon: '📊' },
-    { name: 'ሽፋን ጠያቂ', path: '/admin/requests', icon: '📝' },
-    { name: 'ጽህፈት ቤቶች', path: '/admin/users', icon: '👥' },
-    { name: 'አዲስ ጽህፈት ቤት', path: '/admin/create-user', icon: '➕' },
+    { name: 'ዳሽቦርድ', path: '/admin', icon: BarChart3, description: 'ዋና ዳሽቦርድ' },
+    { name: 'ሽፋን ጠያቂ', path: '/admin/requests', icon: FileText, description: 'ጥያቄዎችን አስተዳደር', badge: pendingCount },
+    { name: 'ጽህፈት ቤቶች', path: '/admin/users', icon: Users, description: 'ጽህፈት ቤቶችን አስተዳደር' },
+    { name: 'አዲስ ጽህፈት ቤት', path: '/admin/create-user', icon: Plus, description: 'አዲስ ጽህፈት ቤት ይጨመሩ' },
   ] : [
-    { name: 'የሚድያ ሽፋን ጠይቅ', path: '/request', icon: '📝' },
-    { name: 'ታሪክ', path: '/history', icon: '📚' },
+    { name: 'ዳሽቦርድ', path: '/dashboard', icon: Home, description: 'ዋና ዳሽቦርድ' },
+    { name: 'የሚድያ ሽፋን ጠይቅ', path: '/request', icon: FileText, description: 'አዲስ ጥያቄ ይጨመሩ' },
+    { name: 'ታሪክ', path: '/history', icon: History, description: 'የቀድሞ ጥያቄዎች' },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-primary shadow-lg border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo and Title */}
-            <div className="flex items-center space-x-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      {/* PWA Banner Spacer - adds space when banner is visible */}
+      <div id="pwa-banner-spacer" className="h-0 transition-all duration-300"></div>
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-white/95 backdrop-blur-xl border-r border-gray-200/50 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between h-20 px-6 border-b border-gray-200/50">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center shadow-lg">
               <img 
-                src="/lovable-uploads/69e823ba-1d77-4469-ad68-c01b1a28cf2b.png" 
+                src="/Images/logo.png" 
                 alt="Logo" 
-                className="h-10 w-10"
+                className="w-8 h-8 object-contain"
               />
-              <h1 className="text-xl font-bold text-primary-foreground">
-                የሚድያ ሽፋን አስተዳደር
-              </h1>
             </div>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">Media Coverage</h1>
+              <p className="text-xs text-gray-500">Management System</p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden text-gray-500 hover:text-gray-700"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  className={`text-primary-foreground hover:text-primary-glow transition-colors px-3 py-2 rounded-md text-sm font-medium ${
-                    location.pathname === item.path ? 'bg-primary-glow/20' : ''
-                  }`}
-                >
-                  <span className="mr-2">{item.icon}</span>
-                  {item.name}
-                </button>
-              ))}
-            </nav>
-
-            {/* User Info and Actions */}
-            <div className="flex items-center space-x-4">
-              <div className="hidden sm:flex items-center space-x-4">
-                <span className="text-primary-foreground text-sm">
-                  {profile?.office_name}
-                </span>
-                {isAdmin && (
-                  <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-glow/20">
-                    <Bell className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSignOut}
-                className="text-primary-foreground hover:bg-primary-glow/20"
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-2">
+          {navigationItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const Icon = item.icon;
+            
+            return (
+              <button
+                key={item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  setSidebarOpen(false);
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 group ${
+                  isActive 
+                    ? 'bg-gradient-to-r from-primary to-primary-glow text-white shadow-lg' 
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
+                }`}
               >
-                <LogOut className="h-4 w-4 mr-2" />
-                ውጣ
-              </Button>
-              
+                <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-primary'}`} />
+                <div className="flex-1">
+                  <div className="font-medium">{item.name}</div>
+                  <div className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                    {item.description}
+                  </div>
+                </div>
+                {item.badge && item.badge > 0 && (
+                  <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* User Profile Section */}
+        <div className="p-4 border-t border-gray-200/50">
+          <div className="flex items-center space-x-3 p-3 rounded-xl bg-gray-50">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-glow rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">
+                {profile?.office_name?.charAt(0) || 'U'}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {profile?.office_name || 'User'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {isAdmin ? 'Administrator' : 'User'}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="text-gray-500 hover:text-red-600 hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="lg:pl-80">
+        {/* Top Header */}
+        <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-30">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
               {/* Mobile Menu Button */}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden text-primary-foreground hover:bg-primary-glow/20"
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden text-gray-600 hover:text-gray-900"
               >
                 <Menu className="h-5 w-5" />
               </Button>
+
+              {/* Page Title */}
+              <div className="flex-1 lg:flex-none">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {navigationItems.find(item => item.path === location.pathname)?.name || 'Dashboard'}
+                </h2>
+              </div>
+
+              {/* Right Side Actions */}
+              <div className="flex items-center space-x-4">
+                {isAdmin && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="relative text-gray-600 hover:text-primary"
+                    onClick={() => navigate('/admin/requests')}
+                  >
+                    <Bell className="h-5 w-5" />
+                    {pendingCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {pendingCount > 99 ? '99+' : pendingCount}
+                      </span>
+                    )}
+                  </Button>
+                )}
+                
+                <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
+                  <span>Welcome,</span>
+                  <span className="font-medium">{profile?.office_name}</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-primary border-t border-primary-glow/20">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.path}
-                  onClick={() => {
-                    navigate(item.path);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className={`text-primary-foreground hover:bg-primary-glow/20 block px-3 py-2 rounded-md text-base font-medium w-full text-left ${
-                    location.pathname === item.path ? 'bg-primary-glow/20' : ''
-                  }`}
-                >
-                  <span className="mr-2">{item.icon}</span>
-                  {item.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+        {/* Main Content */}
+        <main className="p-4 sm:p-6 lg:p-8">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

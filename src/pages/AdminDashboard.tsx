@@ -4,6 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, FileText, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { formatCompleteEthiopianDate } from '@/utils/ethiopianCalendar';
+import { useNotifications } from '@/hooks/useNotifications';
+import { PWATest } from '@/components/PWATest';
+import { PWADebugger } from '@/components/PWADebugger';
+import { InstallPromptTrigger } from '@/components/InstallPromptTrigger';
 
 interface DashboardStats {
   totalRequests: number;
@@ -15,6 +20,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  const { pendingCount } = useNotifications();
   const [stats, setStats] = useState<DashboardStats>({
     totalRequests: 0,
     pendingRequests: 0,
@@ -166,10 +172,10 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">ዳሽቦርድ</h1>
-          {stats.pendingRequests > 0 && (
+          {pendingCount > 0 && (
             <div className="flex items-center gap-2 text-warning">
               <AlertCircle className="h-5 w-5" />
-              <span className="font-medium">{stats.pendingRequests} አዲስ ጥያቄ</span>
+              <span className="font-medium">{pendingCount} አዲስ ጥያቄ</span>
             </div>
           )}
         </div>
@@ -248,7 +254,7 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {new Date(request.created_at).toLocaleDateString('am-ET')}
+                        {formatCompleteEthiopianDate(request.created_at)}
                       </div>
                     </div>
                   ))
@@ -256,6 +262,21 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* PWA Test Component */}
+        <div className="mt-8">
+          <PWATest />
+        </div>
+
+        {/* Install Prompt Trigger */}
+        <div className="mt-8">
+          <InstallPromptTrigger />
+        </div>
+
+        {/* PWA Debugger Component */}
+        <div className="mt-8">
+          <PWADebugger />
         </div>
       </div>
     </Layout>

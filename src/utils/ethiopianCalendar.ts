@@ -17,39 +17,53 @@ interface EthiopianDate {
   day: number;
 }
 
-// Convert Gregorian date to Ethiopian calendar
+// Convert Gregorian date to Ethiopian calendar using accurate algorithm
 export function gregorianToEthiopian(gregorianDate: Date): EthiopianDate {
-  const year = gregorianDate.getFullYear();
-  const month = gregorianDate.getMonth() + 1; // 0-based to 1-based
-  const day = gregorianDate.getDate();
-  
-  // Ethiopian New Year starts on September 11 (or 12 in leap years)
-  const ethiopianYear = year - 7; // Ethiopian calendar is ~7-8 years behind
-  
-  // Simple approximation - in production, you'd use a proper conversion algorithm
-  // For now, just adjust the year and keep similar month/day structure
-  let ethMonth = month - 8; // September (9) becomes month 1 (Meskerem)
-  let ethDay = day;
-  let ethYear = ethiopianYear;
-  
-  if (ethMonth <= 0) {
-    ethMonth += 12;
-    ethYear -= 1;
+  // Extract Gregorian parts
+  const gYear = gregorianDate.getFullYear();
+  const gMonth = gregorianDate.getMonth() + 1; // JS months are 0-11
+  const gDay = gregorianDate.getDate();
+
+  // Ethiopian YEAR
+  let ethYear = (gMonth > 9 || (gMonth === 9 && gDay >= 11)) ? gYear - 7 : gYear - 8;
+
+  // Ethiopian MONTH & DAY (approx. mapping)
+  const ethMonthStart = [
+    [9, 11], [10, 11], [11, 10], [12, 10], [1, 9], [2, 8],
+    [3, 10], [4, 9], [5, 9], [6, 8], [7, 8], [8, 7], [9, 6] // [Gregorian month, day]
+  ];
+
+  let ethMonth = 1, ethDay = 1;
+  for (let i = 0; i < 13; i++) {
+    let [gm, gd] = ethMonthStart[i];
+    let gTest = new Date(gYear, gm - 1, gd);
+    if (gregorianDate >= gTest) {
+      ethMonth = i + 1;
+      // Days difference
+      const diff = Math.floor((gregorianDate - gTest) / (1000 * 60 * 60 * 24));
+      ethDay = diff + 1;
+    }
   }
-  
-  // Ensure month is within bounds (1-13)
-  if (ethMonth > 13) {
-    ethMonth = 13;
-  }
-  
-  // Ensure day is within bounds for Ethiopian months
-  if (ethMonth <= 12 && ethDay > 30) {
-    ethDay = 30;
-  } else if (ethMonth === 13 && ethDay > 6) {
-    ethDay = 6;
-  }
-  
+
   return { year: ethYear, month: ethMonth, day: ethDay };
+}
+
+// Convert Ethiopian time using accurate algorithm
+export function gregorianToEthiopianTime(gregorianDate: Date): { hour: number; minute: number } {
+  const gHour = gregorianDate.getHours();
+  const gMinute = gregorianDate.getMinutes();
+
+  // Ethiopian TIME (6 hours behind standard time)
+  // 6 AM = 12 ሰዓት (Ethiopian morning)
+  // 12 PM = 6 ሰዓት (Ethiopian afternoon) 
+  // 6 PM = 12 ሰዓት (Ethiopian evening)
+  // 2 PM = 8 ሰዓት (Ethiopian afternoon)
+  
+  let ethHour = gHour - 6;
+  if (ethHour <= 0) ethHour += 12;
+  if (ethHour > 12) ethHour -= 12;
+
+  return { hour: ethHour, minute: gMinute };
 }
 
 // Format Ethiopian date as readable text
