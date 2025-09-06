@@ -170,7 +170,7 @@ export default function Login() {
           <div className="text-center mt-8">
             <div className="inline-flex items-center space-x-2 text-gray-500">
               <img 
-                src="/Images/web_icon.svg" 
+                src="/icon.PNG" 
                 alt="Web Icon" 
                 className="h-5 w-5 opacity-60"
               />

@@ -2,9 +2,7 @@ const CACHE_NAME = 'media-coverage-v2';
 const urlsToCache = [
   '/',
   '/manifest.json',
-  '/favicon.svg',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
+  '/icon.PNG'
 ];
 
 // Install event

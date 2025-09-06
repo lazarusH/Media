@@ -6,9 +6,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Users, FileText, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { formatCompleteEthiopianDate } from '@/utils/ethiopianCalendar';
 import { useNotifications } from '@/hooks/useNotifications';
-import { PWATest } from '@/components/PWATest';
-import { PWADebugger } from '@/components/PWADebugger';
-import { InstallPromptTrigger } from '@/components/InstallPromptTrigger';
 
 interface DashboardStats {
   totalRequests: number;
@@ -264,20 +261,6 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* PWA Test Component */}
-        <div className="mt-8">
-          <PWATest />
-        </div>
-
-        {/* Install Prompt Trigger */}
-        <div className="mt-8">
-          <InstallPromptTrigger />
-        </div>
-
-        {/* PWA Debugger Component */}
-        <div className="mt-8">
-          <PWADebugger />
-        </div>
       </div>
     </Layout>
   );

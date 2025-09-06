@@ -83,11 +83,15 @@ export function PWANotificationBanner() {
   // Effect to manage spacer when banner shows/hides
   useEffect(() => {
     const spacer = document.getElementById('pwa-banner-spacer');
+    const root = document.documentElement;
+    
     if (spacer) {
       if (showBanner && !isInstalled) {
-        spacer.className = 'h-16 transition-all duration-300'; // Increased height for better spacing
+        spacer.className = 'h-20 transition-all duration-300';
+        root.style.setProperty('--banner-height', '80px');
       } else {
         spacer.className = 'h-0 transition-all duration-300';
+        root.style.setProperty('--banner-height', '0px');
       }
     }
   }, [showBanner, isInstalled]);
@@ -131,9 +135,9 @@ export function PWANotificationBanner() {
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-primary-glow text-white shadow-lg animate-in slide-in-from-top duration-500">
-      <div className="px-4 py-2">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-primary-glow text-white shadow-lg animate-in slide-in-from-top duration-500 h-20">
+      <div className="px-4 py-3 h-full flex items-center">
+        <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <Bell className="w-5 h-5 animate-pulse" />
@@ -153,19 +157,21 @@ export function PWANotificationBanner() {
               id="installBtn"
               onClick={handleInstallClick}
               size="sm"
-              className="bg-white/90 hover:bg-white text-gray-900 border-white/50 shadow-lg hover:shadow-xl transition-all duration-200 font-medium px-4 py-2 rounded-lg"
+              className="bg-primary hover:bg-primary-glow text-primary-foreground border-primary/20 shadow-lg hover:shadow-xl transition-all duration-200 font-medium px-3 py-2 rounded-lg text-sm sm:px-4 sm:text-base"
               style={{ display: 'none' }}
             >
-              <Download className="w-4 h-4 mr-2" />
-              <span className="font-semibold">Add to Home Screen</span>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Download className="w-4 h-4" />
+                <span className="font-semibold">ጫን</span>
+              </div>
             </Button>
             <Button
               onClick={handleDismiss}
               size="sm"
               variant="ghost"
-              className="text-white/80 hover:text-white hover:bg-white/10"
+              className="text-white/80 hover:text-white hover:bg-white/10 p-1 sm:p-2 flex items-center justify-center"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           </div>
         </div>
