@@ -4,9 +4,13 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, User, Calendar, Activity, MapPin, Clock, FileText } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Activity, MapPin, Clock, FileText, Edit } from 'lucide-react';
 import { formatCompleteEthiopianDate, formatEthiopianTime } from '@/utils/ethiopianCalendar';
+import { useToast } from '@/hooks/use-toast';
 
 interface Profile {
   id: string;
@@ -35,6 +39,13 @@ export default function AdminUserDetail() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [requests, setRequests] = useState<MediaRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [editOfficeName, setEditOfficeName] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [openManage, setOpenManage] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (userId) {
@@ -53,6 +64,7 @@ export default function AdminUserDetail() {
 
       if (profileError) throw profileError;
       setProfile(profileData);
+      setEditOfficeName(profileData.office_name);
 
       // Fetch user's media requests
       const { data: requestsData, error: requestsError } = await supabase
@@ -67,6 +79,72 @@ export default function AdminUserDetail() {
       console.error('Error fetching user details:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const callAdminUsers = async (body: any) => {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      body,
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  const handleSaveName = async () => {
+    if (!userId) return;
+    if (!editOfficeName.trim()) {
+      toast({ title: 'ስህተት', description: 'የጽህፈት ቤት ስም ያስገቡ', variant: 'destructive' });
+      return;
+    }
+    try {
+      setSaving(true);
+      await callAdminUsers({ action: 'update_profile', targetUserId: userId, officeName: editOfficeName.trim() });
+      toast({ title: 'ተሳክቷል', description: 'የተጠቃሚ ስም ተዘመነ' });
+      await fetchUserDetails();
+      setOpenEdit(false);
+    } catch (e: any) {
+      toast({ title: 'አልተሳካም', description: e.message || 'ማሻሻያ አልተሳካም', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!userId) return;
+    if (!password || password.length < 6) {
+      toast({ title: 'ስህተት', description: 'የይለፍ ቃል ቢያንስ 6 ቁምፊ ይሁን', variant: 'destructive' });
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast({ title: 'ስህተት', description: 'የይለፍ ቃል አይመሳሰሉም', variant: 'destructive' });
+      return;
+    }
+    try {
+      setSaving(true);
+      await callAdminUsers({ action: 'change_password', targetUserId: userId, newPassword: password });
+      toast({ title: 'ተሳክቷል', description: 'የይለፍ ቃል ተቀይሯል' });
+      setPassword('');
+      setConfirmPassword('');
+      setOpenPassword(false);
+    } catch (e: any) {
+      toast({ title: 'አልተሳካም', description: e.message || 'መቀየር አልተሳካም', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userId) return;
+    try {
+      setDeleting(true);
+      await callAdminUsers({ action: 'delete_user', targetUserId: userId });
+      toast({ title: 'ተሳክቷል', description: 'ተጠቃሚው ተሰርዟል' });
+      navigate('/admin/users');
+    } catch (e: any) {
+      toast({ title: 'አልተሳካም', description: e.message || 'ማጥፋት አልተሳካም', variant: 'destructive' });
+    } finally {
+      setDeleting(false);
+      setOpenDelete(false);
     }
   };
 
@@ -135,9 +213,53 @@ export default function AdminUserDetail() {
         {/* User Profile Card */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              የተጠቃሚ መረጃ
+            <CardTitle className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                የተጠቃሚ መረጃ
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Dialog open={openManage} onOpenChange={setOpenManage}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                      <Edit className="h-4 w-4 mr-2" />
+                      አርትዖት
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[520px]">
+                    <DialogHeader>
+                      <DialogTitle>ተጠቃሚ አስተዳደር</DialogTitle>
+                      <DialogDescription>ስም ያሻሽሉ፣ የይለፍ ቃል ቀይሩ ወይም ይህን ተጠቃሚ ያስወግዱ</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="officeName">የጽህፈት ቤት ስም</Label>
+                        <div className="flex gap-2 flex-col sm:flex-row">
+                          <Input id="officeName" value={editOfficeName} onChange={(e) => setEditOfficeName(e.target.value)} placeholder="የጽህፈት ቤት ስም ያስገቡ" />
+                          <Button onClick={handleSaveName} disabled={saving} className="w-full sm:w-auto">{saving ? 'በማስቀመጥ ላይ...' : 'ስም አስቀምጥ'}</Button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="newPassword">የይለፍ ቃል መቀየሪያ</Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <Input id="newPassword" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="አዲስ የይለፍ ቃል" />
+                          <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="ያረጋግጡ" />
+                          <Button onClick={handleChangePassword} disabled={saving}>{saving ? 'በማስቀመጥ ላይ...' : 'የይለፍ ቃል ቀይር'}</Button>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t flex justify-between items-center gap-2 flex-col sm:flex-row">
+                        <div className="text-sm text-muted-foreground">ይህ ተጠቃሚ ከስርዓቱ ይወገዳል። ለዘላቂ ጊዜ እንዳይመለስ ይረሳሉ።</div>
+                        <Button variant="destructive" onClick={handleDeleteUser} disabled={deleting} className="w-full sm:w-auto">
+                          {deleting ? 'በማጥፋት ላይ...' : 'ተጠቃሚን ሰርዝ'}
+                        </Button>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setOpenManage(false)} className="w-full sm:w-auto">ዝጋ</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">

@@ -29,7 +29,7 @@ export function isValidCoverageTime(coverageDate: string, coverageTime: string):
     if (isBefore(selectedDate, tomorrow)) {
       return {
         isValid: false,
-        message: 'የሚድያ ሽፋን ጥያቄ ቢያንስ ለነገ ወይም ከዛ በኋላ ላለው ቀን መሆን አለበት።'
+        message: 'የሚድያ ሽፋን ጥያቄ የሚቀርብበት ሰአት ስላለፈ ጥያቄዎ ተቀባይነት አላገኘም። ከይቅርታ ጋር!'
       };
     }
     

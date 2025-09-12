@@ -299,7 +299,7 @@ export default function RequestForm() {
                       <Alert className="border-amber-200 bg-amber-50/80">
                         <AlertCircle className="h-4 w-4 text-amber-600" />
                         <AlertDescription className="text-amber-800">
-                          <strong>ማስታወሻ:</strong> ለነገ የሚሆን የሚድያ ሽፋን ጥያቄ ከ1:00 PM በፊት መቅረብ አለበት። ከዚያ በኋላ ከነገ ወዲያ ላሉት ቀናት ብቻ ማስገባት ይችላሉ።
+                          <strong>ማስታወሻ:</strong> ለነገ የሚሆን የሚድያ ሽፋን ጥያቄ በኢትዮጵያ አቆጣጠር ከቀኑ 7 ሰአት በፊት መቅረብ አለበት። ከዚያ በኋላ ከነገ ወዲያ ላሉት ቀናት ብቻ ማስገባት ይችላሉ።
                         </AlertDescription>
                       </Alert>
 

@@ -45,7 +45,7 @@ BEGIN
     -- Check if coverage date is in the past
     IF NEW.coverage_date < CURRENT_DATE + INTERVAL '1 day' THEN
         RAISE EXCEPTION 'P0002' USING 
-            MESSAGE = 'የሚድያ ሽፋን ጥያቄ ቢያንስ ለነገ ወይም ከዛ በኋላ ላለው ቀን መሆን አለበት።';
+            MESSAGE = 'የሚድያ ሽፋን ጥያቄ የሚቀርብበት ሰአት ስላለፈ ጥያቄዎ ተቀባይነት አላገኘም። ከይቅርታ ጋር!';
     END IF;
     
     RETURN NEW;
