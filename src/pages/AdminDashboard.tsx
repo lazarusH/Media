@@ -3,17 +3,18 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Users, FileText, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Users, FileText, Clock, CheckCircle, XCircle, AlertCircle, AlertTriangle } from 'lucide-react';
 import { formatCompleteEthiopianDate } from '@/utils/ethiopianCalendar';
 import { useNotifications } from '@/hooks/useNotifications';
+import { isRequestExpired } from '@/utils/checkExpired';
 
 interface DashboardStats {
   totalRequests: number;
   pendingRequests: number;
   acceptedRequests: number;
   rejectedRequests: number;
+  expiredRequests: number;
   totalUsers: number;
-  recentRequests: any[];
 }
 
 export default function AdminDashboard() {
@@ -23,8 +24,8 @@ export default function AdminDashboard() {
     pendingRequests: 0,
     acceptedRequests: 0,
     rejectedRequests: 0,
-    totalUsers: 0,
-    recentRequests: []
+    expiredRequests: 0,
+    totalUsers: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +58,7 @@ export default function AdminDashboard() {
       // Fetch requests stats
       const { data: requests, error: requestsError } = await supabase
         .from('media_requests')
-        .select('status, created_at, office_name, agenda');
+        .select('status, created_at, coverage_date, office_name, agenda');
 
       if (requestsError) throw requestsError;
 
@@ -74,7 +75,12 @@ export default function AdminDashboard() {
         acc.totalRequests++;
         switch (request.status) {
           case 'pending':
-            acc.pendingRequests++;
+            // Check if pending request is expired
+            if (isRequestExpired(request.coverage_date, request.status)) {
+              acc.expiredRequests++;
+            } else {
+              acc.pendingRequests++;
+            }
             break;
           case 'accepted':
             acc.acceptedRequests++;
@@ -89,8 +95,8 @@ export default function AdminDashboard() {
         pendingRequests: 0,
         acceptedRequests: 0,
         rejectedRequests: 0,
-        totalUsers: profiles?.length || 0,
-        recentRequests: requests?.slice(-5) || []
+        expiredRequests: 0,
+        totalUsers: profiles?.length || 0
       });
 
       setStats(stats || {
@@ -98,8 +104,8 @@ export default function AdminDashboard() {
         pendingRequests: 0,
         acceptedRequests: 0,
         rejectedRequests: 0,
-        totalUsers: profiles?.length || 0,
-        recentRequests: []
+        expiredRequests: 0,
+        totalUsers: profiles?.length || 0
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -123,6 +129,11 @@ export default function AdminDashboard() {
       name: 'ተከልክሏል',
       value: stats.rejectedRequests,
       fill: '#ef4444'
+    },
+    {
+      name: 'ጊዜ አልቋል',
+      value: stats.expiredRequests,
+      fill: '#dc2626'
     }
   ];
 
@@ -142,7 +153,7 @@ export default function AdminDashboard() {
       bgColor: 'bg-warning/10'
     },
     {
-      title: 'ተቀባይነት የአግኘ',
+      title: 'ተቀባይነት ያገኘ',
       value: stats.acceptedRequests,
       icon: CheckCircle,
       color: 'text-success',
@@ -156,11 +167,20 @@ export default function AdminDashboard() {
       bgColor: 'bg-destructive/10'
     },
     {
+      title: 'ጊዜ አልቋል',
+      value: stats.expiredRequests,
+      icon: AlertTriangle,
+      color: 'text-red-600',
+      bgColor: 'bg-red-100'
+    },
+    {
       title: 'ጽህፈት ቤቶች',
       value: stats.totalUsers,
       icon: Users,
-      color: 'text-primary',
-      bgColor: 'bg-primary/10'
+      color: 'text-white',
+      bgColor: 'bg-gradient-to-br from-primary to-primary-glow',
+      borderColor: 'border-primary',
+      isUnique: true
     }
   ];
 
@@ -178,88 +198,59 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {statCards.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={index}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    {stat.title}
-                  </CardTitle>
-                  <div className={`p-2 rounded-full ${stat.bgColor}`}>
-                    <Icon className={`h-4 w-4 ${stat.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-2xl font-bold ${stat.color}`}>
-                    {loading ? '...' : stat.value}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+           {statCards.map((stat, index) => {
+             const Icon = stat.icon;
+             return (
+               <Card 
+                 key={index}
+                 className={stat.isUnique ? `border-2 ${stat.borderColor} shadow-xl rounded-2xl overflow-hidden` : ''}
+               >
+                 <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-3 ${stat.isUnique ? stat.bgColor : ''}`}>
+                   <CardTitle className={`text-sm font-semibold ${stat.isUnique ? 'text-white' : ''}`}>
+                     {stat.title}
+                   </CardTitle>
+                   <div className={`p-3 rounded-xl ${stat.isUnique ? 'bg-white/20 backdrop-blur-sm' : stat.bgColor}`}>
+                     <Icon className={`h-5 w-5 ${stat.color}`} />
+                   </div>
+                 </CardHeader>
+                 <CardContent className={`${stat.isUnique ? stat.bgColor : ''} pt-0`}>
+                   <div className={`text-3xl font-bold ${stat.color} ${stat.isUnique ? 'drop-shadow-sm' : ''}`}>
+                     {loading ? '...' : stat.value}
+                   </div>
+                   {stat.isUnique && (
+                     <div className="text-white/80 text-xs mt-1 font-medium">
+                       አጠቃላይ ቁጥር
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+             );
+           })}
+         </div>
 
-        {/* Charts and Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Status Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>የጥያቄዎች ሁኔታ</CardTitle>
-              <CardDescription>
-                ጥያቄዎች በሁኔታ ተከፋፍለው
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Recent Requests */}
-          <Card>
-            <CardHeader>
-              <CardTitle>የቅርብ ጊዜ ጥያቄዎች</CardTitle>
-              <CardDescription>
-                በቅርብ ጊዜ የተላኩ ጥያቄዎች
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {stats.recentRequests.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">
-                    የቅርብ ጊዜ ጥያቄ የለም
-                  </p>
-                ) : (
-                  stats.recentRequests.slice(0, 5).map((request, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-muted rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium">{request.office_name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {request.agenda?.substring(0, 50)}...
-                        </p>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {formatCompleteEthiopianDate(request.created_at)}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+         {/* Status Chart */}
+         <div className="grid grid-cols-1 gap-6">
+           <Card>
+             <CardHeader>
+               <CardTitle>የጥያቄዎች ሁኔታ</CardTitle>
+               <CardDescription>
+                 ጥያቄዎች በሁኔታ ተከፋፍለው
+               </CardDescription>
+             </CardHeader>
+             <CardContent>
+               <ResponsiveContainer width="100%" height={300}>
+                 <BarChart data={chartData}>
+                   <CartesianGrid strokeDasharray="3 3" />
+                   <XAxis dataKey="name" />
+                   <YAxis />
+                   <Tooltip />
+                   <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+                 </BarChart>
+               </ResponsiveContainer>
+             </CardContent>
+           </Card>
+         </div>
 
       </div>
     </Layout>

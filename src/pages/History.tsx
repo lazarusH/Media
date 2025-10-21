@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Clock, CheckCircle, XCircle, Calendar, MapPin, FileText } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Calendar, MapPin, FileText, AlertTriangle } from 'lucide-react';
 import { formatCompleteEthiopianDate, formatEthiopianTime } from '@/utils/ethiopianCalendar';
+import { isRequestExpired } from '@/utils/checkExpired';
 
 interface MediaRequest {
   id: string;
@@ -165,13 +166,26 @@ export default function History() {
                     <CardTitle className="text-lg">
                       {request.office_name}
                     </CardTitle>
-                    <Badge
-                      variant={getStatusVariant(request.status)}
-                      className="flex items-center gap-1"
-                    >
-                      {getStatusIcon(request.status)}
-                      {getStatusText(request.status)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {!isRequestExpired(request.coverage_date, request.status) && (
+                        <Badge
+                          variant={getStatusVariant(request.status)}
+                          className="flex items-center gap-1"
+                        >
+                          {getStatusIcon(request.status)}
+                          {getStatusText(request.status)}
+                        </Badge>
+                      )}
+                      {isRequestExpired(request.coverage_date, request.status) && (
+                        <Badge
+                          variant="destructive"
+                          className="flex items-center gap-1"
+                        >
+                          <AlertTriangle className="h-3 w-3" />
+                          ጊዜ አልቋል
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">

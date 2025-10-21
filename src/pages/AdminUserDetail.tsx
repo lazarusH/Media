@@ -45,6 +45,8 @@ export default function AdminUserDetail() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [openManage, setOpenManage] = useState(false);
+  const [openPassword, setOpenPassword] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -101,7 +103,6 @@ export default function AdminUserDetail() {
       await callAdminUsers({ action: 'update_profile', targetUserId: userId, officeName: editOfficeName.trim() });
       toast({ title: 'ተሳክቷል', description: 'የተጠቃሚ ስም ተዘመነ' });
       await fetchUserDetails();
-      setOpenEdit(false);
     } catch (e: any) {
       toast({ title: 'አልተሳካም', description: e.message || 'ማሻሻያ አልተሳካም', variant: 'destructive' });
     } finally {

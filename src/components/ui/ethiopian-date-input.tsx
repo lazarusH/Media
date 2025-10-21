@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import {
   ETHIOPIAN_MONTHS,
   EthiopianDateTime,
-  getMinimumAllowedEthiopianDate
+  getMinimumAllowedEthiopianDate,
+  gregorianToEthiopianAccurate
 } from '@/utils/ethiopianDateInput';
 
 interface EthiopianDateInputProps {
@@ -21,15 +22,27 @@ export function EthiopianDateInput({ value, onChange, disabled }: EthiopianDateI
     year: ''
   });
 
-  // Initialize with minimum allowed date
+  // Parse the value prop to initialize state or set current Ethiopian year
   useEffect(() => {
-    const minDate = getMinimumAllowedEthiopianDate();
-    setDate({
-      day: minDate.day.toString(),
-      month: minDate.month.toString(),
-      year: minDate.year.toString()
-    });
-  }, []);
+    if (value) {
+      const parts = value.split(' ');
+      if (parts.length === 3) {
+        setDate({
+          day: parts[0],
+          month: parts[1],
+          year: parts[2]
+        });
+      }
+    } else {
+      // Set current Ethiopian year if no value provided
+      const currentEthDate = gregorianToEthiopianAccurate(new Date());
+      setDate({
+        day: '',
+        month: '',
+        year: currentEthDate.year.toString()
+      });
+    }
+  }, [value]);
 
   // Update parent when local state changes
   useEffect(() => {
@@ -107,8 +120,9 @@ export function EthiopianDateInput({ value, onChange, disabled }: EthiopianDateI
           type="number"
           value={date.year}
           onChange={handleInputChange('year')}
-          disabled={disabled}
+          disabled={true}
           placeholder="ዓ.ም"
+          className="bg-gray-100 cursor-not-allowed"
         />
       </div>
     </div>

@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Clock, Eye, Check, X, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Clock, Eye, Check, X, Loader2, AlertTriangle } from 'lucide-react';
 import { formatCompleteEthiopianDate, formatEthiopianTime } from '@/utils/ethiopianCalendar';
+import { isRequestExpired } from '@/utils/checkExpired';
 
 interface MediaRequest {
   id: string;
@@ -221,9 +222,22 @@ export default function AdminRequests() {
                     <CardTitle className="text-lg">
                       {request.office_name}
                     </CardTitle>
-                    <Badge variant={getStatusVariant(request.status)}>
-                      {getStatusText(request.status)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {!isRequestExpired(request.coverage_date, request.status) && (
+                        <Badge variant={getStatusVariant(request.status)}>
+                          {getStatusText(request.status)}
+                        </Badge>
+                      )}
+                      {isRequestExpired(request.coverage_date, request.status) && (
+                        <Badge
+                          variant="destructive"
+                          className="flex items-center gap-1"
+                        >
+                          <AlertTriangle className="h-3 w-3" />
+                          ጊዜ አልቋል
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -247,30 +261,32 @@ export default function AdminRequests() {
                     </p>
                   </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleAccept(request.id)}
-                      disabled={actionLoading === request.id}
-                      className="bg-success hover:bg-success/90"
-                    >
-                      {actionLoading === request.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Check className="h-4 w-4 mr-1" />
-                      )}
-                      ተቀበል
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => openRejectDialog(request)}
-                      disabled={actionLoading === request.id}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      ውድቅ አድርግ
-                    </Button>
-                  </div>
+                  {!isRequestExpired(request.coverage_date, request.status) && (
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleAccept(request.id)}
+                        disabled={actionLoading === request.id}
+                        className="bg-success hover:bg-success/90"
+                      >
+                        {actionLoading === request.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="h-4 w-4 mr-1" />
+                        )}
+                        ተቀበል
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => openRejectDialog(request)}
+                        disabled={actionLoading === request.id}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        ውድቅ አድርግ
+                      </Button>
+                    </div>
+                  )}
 
                   <div className="text-xs text-muted-foreground pt-2 border-t">
                     ተላከ: {formatDate(request.created_at)}
@@ -292,9 +308,22 @@ export default function AdminRequests() {
                     <CardTitle className="text-lg">
                       {request.office_name}
                     </CardTitle>
-                    <Badge variant={getStatusVariant(request.status)}>
-                      {getStatusText(request.status)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {!isRequestExpired(request.coverage_date, request.status) && (
+                        <Badge variant={getStatusVariant(request.status)}>
+                          {getStatusText(request.status)}
+                        </Badge>
+                      )}
+                      {isRequestExpired(request.coverage_date, request.status) && (
+                        <Badge
+                          variant="destructive"
+                          className="flex items-center gap-1"
+                        >
+                          <AlertTriangle className="h-3 w-3" />
+                          ጊዜ አልቋል
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">

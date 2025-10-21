@@ -26,7 +26,7 @@ export function sanitizeText(input: string): string {
  */
 export function sanitizeOfficeName(input: string): string {
   return sanitizeText(input)
-    .replace(/[^a-zA-Z0-9\u1200-\u137F\s]/g, '') // Only allow alphanumeric, Amharic, and spaces
+    .replace(/[<>\"'&]/g, '') // Only remove potentially dangerous characters, allow special characters
     .substring(0, SECURITY_CONFIG.INPUT_VALIDATION.MAX_OFFICE_NAME_LENGTH); // Limit length
 }
 
