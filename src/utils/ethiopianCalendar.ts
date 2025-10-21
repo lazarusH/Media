@@ -19,32 +19,38 @@ interface EthiopianDate {
 
 // Convert Gregorian date to Ethiopian calendar using accurate algorithm
 export function gregorianToEthiopian(gregorianDate: Date): EthiopianDate {
-  // Extract Gregorian parts
   const gYear = gregorianDate.getFullYear();
-  const gMonth = gregorianDate.getMonth() + 1; // JS months are 0-11
+  const gMonth = gregorianDate.getMonth() + 1;
   const gDay = gregorianDate.getDate();
 
-  // Ethiopian YEAR
-  let ethYear = (gMonth > 9 || (gMonth === 9 && gDay >= 11)) ? gYear - 7 : gYear - 8;
-
-  // Ethiopian MONTH & DAY (approx. mapping)
-  const ethMonthStart = [
-    [9, 11], [10, 11], [11, 10], [12, 10], [1, 9], [2, 8],
-    [3, 10], [4, 9], [5, 9], [6, 8], [7, 8], [8, 7], [9, 6] // [Gregorian month, day]
-  ];
-
-  let ethMonth = 1, ethDay = 1;
-  for (let i = 0; i < 13; i++) {
-    let [gm, gd] = ethMonthStart[i];
-    let gTest = new Date(gYear, gm - 1, gd);
-    if (gregorianDate >= gTest) {
-      ethMonth = i + 1;
-      // Days difference
-      const diff = Math.floor((gregorianDate - gTest) / (1000 * 60 * 60 * 24));
-      ethDay = diff + 1;
-    }
+  let ethYear = gYear - 7;
+  if (gMonth < 9 || (gMonth === 9 && gDay < 11)) {
+    ethYear = gYear - 8;
   }
 
+  const ethNewYear = new Date(gYear, 8, 11);
+  const daysSinceNewYear = Math.floor((gregorianDate.getTime() - ethNewYear.getTime()) / (1000 * 60 * 60 * 24));
+  
+  let remainingDays;
+  if (daysSinceNewYear < 0) {
+    ethYear = gYear - 8;
+    const prevEthNewYear = new Date(gYear - 1, 8, 11);
+    remainingDays = Math.floor((gregorianDate.getTime() - prevEthNewYear.getTime()) / (1000 * 60 * 60 * 24));
+  } else {
+    remainingDays = daysSinceNewYear;
+  }
+  
+  let ethMonth = 1;
+  let ethDay = 1;
+  for (let month = 1; month <= 13; month++) {
+    const daysInMonth = (month === 13) ? 6 : 30;
+    if (remainingDays < daysInMonth) {
+      ethMonth = month;
+      ethDay = remainingDays + 1;
+      break;
+    }
+    remainingDays -= daysInMonth;
+  }
   return { year: ethYear, month: ethMonth, day: ethDay };
 }
 
