@@ -80,6 +80,10 @@ export default function RequestForm() {
 
     console.log('🔍 Debug: Parsed Ethiopian date:', ethDate);
     console.log('🔍 Debug: Parsed Ethiopian time:', ethTime);
+    
+    // Extract time period from the time string
+    const timePeriod = ethTime.period || 'ጥዋት'; // Default to morning if not specified
+    console.log('🔍 Debug: Extracted time period:', timePeriod);
 
     if (!ethDate || !ethTime) {
       console.error('❌ Error: Failed to parse Ethiopian date or time');
@@ -130,7 +134,7 @@ export default function RequestForm() {
         office_name: profile?.office_name || '',
         coverage_date: gregorianDate.toISOString().split('T')[0],
         coverage_time: time24Hour,
-        ethiopian_time: formData.coverageTime, // Store original Ethiopian time format
+        time_period: timePeriod,
         location: sanitizedLocation,
         agenda: sanitizedAgenda
       };

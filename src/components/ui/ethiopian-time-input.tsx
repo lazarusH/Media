@@ -19,13 +19,10 @@ export function EthiopianTimeInput({ value, onChange, disabled }: EthiopianTimeI
 
   // Update parent when local state changes
   useEffect(() => {
-    // Only call onChange when all fields are properly filled
-    if (time.hour && time.minute && time.period && 
-        parseInt(time.hour) >= 1 && parseInt(time.hour) <= 12 &&
-        parseInt(time.minute) >= 0 && parseInt(time.minute) <= 59) {
+    if (time.hour && time.minute && time.period) {
       onChange(`${time.hour}:${time.minute} ${time.period}`);
     } else {
-      onChange(''); // Clear the value if not all fields are properly filled
+      onChange(''); // Clear the value if not all fields are filled
     }
   }, [time, onChange]);
 
@@ -37,7 +34,6 @@ export function EthiopianTimeInput({ value, onChange, disabled }: EthiopianTimeI
     }
     let hour = parseInt(value);
     if (isNaN(hour)) return;
-    // Ensure 12-hour format (1-12)
     if (hour < 1) hour = 1;
     if (hour > 12) hour = 12;
     setTime(prev => ({ ...prev, hour: hour.toString() }));
@@ -69,7 +65,6 @@ export function EthiopianTimeInput({ value, onChange, disabled }: EthiopianTimeI
           onChange={handleHourChange}
           disabled={disabled}
           placeholder="ሰዓት (1-12)"
-          className="text-center"
         />
       </div>
       <div>
@@ -83,7 +78,6 @@ export function EthiopianTimeInput({ value, onChange, disabled }: EthiopianTimeI
           onChange={handleMinuteChange}
           disabled={disabled}
           placeholder="ደቂቃ (0-59)"
-          className="text-center"
         />
       </div>
       <div>

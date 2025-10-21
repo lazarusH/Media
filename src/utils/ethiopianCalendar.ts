@@ -59,19 +59,15 @@ export function gregorianToEthiopianTime(gregorianDate: Date): { hour: number; m
   const gHour = gregorianDate.getHours();
   const gMinute = gregorianDate.getMinutes();
 
-  // Ethiopian TIME conversion from 24-hour to 12-hour format
-  // 6 AM - 5 PM (6-17) = 1-12 Ethiopian morning
-  // 6 PM - 5 AM (18-23, 0-5) = 1-12 Ethiopian afternoon/evening
+  // Ethiopian TIME (6 hours behind standard time)
+  // 6 AM = 12 ሰዓት (Ethiopian morning)
+  // 12 PM = 6 ሰዓት (Ethiopian afternoon) 
+  // 6 PM = 12 ሰዓት (Ethiopian evening)
+  // 2 PM = 8 ሰዓት (Ethiopian afternoon)
   
-  let ethHour: number;
-  if (gHour >= 6 && gHour < 18) {
-    // Morning period: 6 AM - 5 PM = 1-12 Ethiopian
-    ethHour = gHour - 5; // 6 becomes 1, 17 becomes 12
-  } else {
-    // Afternoon/Evening period: 6 PM - 5 AM = 1-12 Ethiopian
-    ethHour = gHour + 7; // 18 becomes 1, 5 becomes 12
-    if (ethHour > 12) ethHour -= 12;
-  }
+  let ethHour = gHour - 6;
+  if (ethHour <= 0) ethHour += 12;
+  if (ethHour > 12) ethHour -= 12;
 
   return { hour: ethHour, minute: gMinute };
 }
@@ -86,7 +82,7 @@ export function formatEthiopianDate(date: Date | string): string {
   return `${ethDate.day} ${monthName} ${ethDate.year} ዓ.ም`;
 }
 
-// Format Ethiopian time with periods (morning, afternoon, evening)
+// Format Ethiopian time without periods (period is stored separately in database)
 export function formatEthiopianTime(time: string): string {
   const [hours, minutes] = time.split(':').map(Number);
   
@@ -96,16 +92,7 @@ export function formatEthiopianTime(time: string): string {
   if (ethHour <= 0) ethHour += 12;
   if (ethHour > 12) ethHour -= 12;
   
-  let period: string;
-  if (hours >= 6 && hours < 12) {
-    period = 'ጥዋት'; // Morning
-  } else if (hours >= 12 && hours < 18) {
-    period = 'ከሰዓት'; // Afternoon
-  } else {
-    period = 'ማታ'; // Evening/Night
-  }
-  
-  return `${ethHour}:${minutes.toString().padStart(2, '0')} ${period}`;
+  return `${ethHour}:${minutes.toString().padStart(2, '0')}`;
 }
 
 // Get Ethiopian weekday name

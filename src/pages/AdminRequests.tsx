@@ -18,7 +18,7 @@ interface MediaRequest {
   office_name: string;
   coverage_date: string;
   coverage_time: string;
-  ethiopian_time?: string; // Add Ethiopian time format
+  time_period?: string;
   location: string;
   agenda: string;
   status: 'pending' | 'accepted' | 'rejected';
@@ -177,8 +177,8 @@ export default function AdminRequests() {
     return formatCompleteEthiopianDate(dateString);
   };
 
-  const formatTime = (request: MediaRequest) => {
-    return request.ethiopian_time || formatEthiopianTime(request.coverage_time);
+  const formatTime = (timeString: string) => {
+    return formatEthiopianTime(timeString);
   };
 
   const pendingRequests = requests.filter(r => r.status === 'pending');
@@ -246,7 +246,7 @@ export default function AdminRequests() {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {formatDate(request.coverage_date)} - {formatTime(request)}
+                        {formatDate(request.coverage_date)} - {formatTime(request.coverage_time)} {request.time_period ? `(${request.time_period})` : ''}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -332,7 +332,7 @@ export default function AdminRequests() {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {formatDate(request.coverage_date)} - {formatTime(request)}
+                        {formatDate(request.coverage_date)} - {formatTime(request.coverage_time)} {request.time_period ? `(${request.time_period})` : ''}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">

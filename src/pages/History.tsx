@@ -13,7 +13,7 @@ interface MediaRequest {
   office_name: string;
   coverage_date: string;
   coverage_time: string;
-  ethiopian_time?: string; // Add Ethiopian time format
+  time_period?: string;
   location: string;
   agenda: string;
   status: 'pending' | 'accepted' | 'rejected';
@@ -194,7 +194,7 @@ export default function History() {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        ሽፋን የሚሰጥበት ቀን: {formatCompleteEthiopianDate(request.coverage_date)} - {request.ethiopian_time || formatEthiopianTime(request.coverage_time)}
+                        ሽፋን የሚሰጥበት ቀን: {formatCompleteEthiopianDate(request.coverage_date)} - {formatEthiopianTime(request.coverage_time)} {request.time_period ? `(${request.time_period})` : ''}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">

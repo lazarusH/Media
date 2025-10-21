@@ -202,21 +202,15 @@ export function ethiopianTimeTo24Hour(hour: number, minute: number, period: keyo
   
   let adjustedHour = hour;
   
-  // Ethiopian time conversion to 24-hour format
-  // Morning (ጥዋት): 1-12 Ethiopian = 6 AM - 5 PM Standard (6-17)
-  // Afternoon (ከሰዓት): 1-12 Ethiopian = 6 PM - 5 AM Standard (18-23, 0-5)
-  // Evening (ማታ): 1-12 Ethiopian = 6 PM - 5 AM Standard (18-23, 0-5)
+  // Ethiopian time is 6 hours behind standard time
+  // Morning (ጥዋት): 12 AM - 11 AM Ethiopian = 6 AM - 5 PM Standard
+  // Afternoon (ከሰዓት): 12 PM - 11 PM Ethiopian = 6 PM - 5 AM Standard
+  // Evening (ማታ): Same as Afternoon
   
   if (period === 'ጥዋት') {
-    // Morning: 1-12 Ethiopian = 6-17 Standard
-    adjustedHour = hour + 5; // 1 becomes 6, 12 becomes 17
-  } else if (period === 'ከሰዓት') {
-    // Afternoon: 1-12 Ethiopian = 18-23, 0-5 Standard
-    adjustedHour = hour + 17; // 1 becomes 18, 12 becomes 29 -> 5
-    if (adjustedHour >= 24) adjustedHour -= 24;
-  } else if (period === 'ማታ') {
-    // Evening: 1-12 Ethiopian = 18-23, 0-5 Standard
-    adjustedHour = hour + 17; // 1 becomes 18, 12 becomes 29 -> 5
+    adjustedHour = (hour === 12 ? 6 : hour + 6);
+  } else if (period === 'ከሰዓት' || period === 'ማታ') {
+    adjustedHour = (hour === 12 ? 18 : hour + 18);
     if (adjustedHour >= 24) adjustedHour -= 24;
   }
   
