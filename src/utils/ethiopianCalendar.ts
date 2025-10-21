@@ -59,15 +59,19 @@ export function gregorianToEthiopianTime(gregorianDate: Date): { hour: number; m
   const gHour = gregorianDate.getHours();
   const gMinute = gregorianDate.getMinutes();
 
-  // Ethiopian TIME (6 hours behind standard time)
-  // 6 AM = 12 ሰዓት (Ethiopian morning)
-  // 12 PM = 6 ሰዓት (Ethiopian afternoon) 
-  // 6 PM = 12 ሰዓት (Ethiopian evening)
-  // 2 PM = 8 ሰዓት (Ethiopian afternoon)
+  // Ethiopian TIME conversion from 24-hour to 12-hour format
+  // 6 AM - 5 PM (6-17) = 1-12 Ethiopian morning
+  // 6 PM - 5 AM (18-23, 0-5) = 1-12 Ethiopian afternoon/evening
   
-  let ethHour = gHour - 6;
-  if (ethHour <= 0) ethHour += 12;
-  if (ethHour > 12) ethHour -= 12;
+  let ethHour: number;
+  if (gHour >= 6 && gHour < 18) {
+    // Morning period: 6 AM - 5 PM = 1-12 Ethiopian
+    ethHour = gHour - 5; // 6 becomes 1, 17 becomes 12
+  } else {
+    // Afternoon/Evening period: 6 PM - 5 AM = 1-12 Ethiopian
+    ethHour = gHour + 7; // 18 becomes 1, 5 becomes 12
+    if (ethHour > 12) ethHour -= 12;
+  }
 
   return { hour: ethHour, minute: gMinute };
 }

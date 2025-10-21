@@ -12,29 +12,45 @@ interface EthiopianTimeInputProps {
 
 export function EthiopianTimeInput({ value, onChange, disabled }: EthiopianTimeInputProps) {
   const [time, setTime] = useState({
-    hour: '12',
-    minute: '00',
+    hour: '',
+    minute: '',
     period: 'ጥዋት' as keyof typeof TIME_PERIODS
   });
 
   // Update parent when local state changes
   useEffect(() => {
-    if (time.hour && time.minute && time.period) {
+    // Only call onChange when all fields are properly filled
+    if (time.hour && time.minute && time.period && 
+        parseInt(time.hour) >= 1 && parseInt(time.hour) <= 12 &&
+        parseInt(time.minute) >= 0 && parseInt(time.minute) <= 59) {
       onChange(`${time.hour}:${time.minute} ${time.period}`);
+    } else {
+      onChange(''); // Clear the value if not all fields are properly filled
     }
   }, [time, onChange]);
 
   const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let hour = parseInt(e.target.value);
-    if (isNaN(hour)) hour = 12;
+    const value = e.target.value;
+    if (value === '') {
+      setTime(prev => ({ ...prev, hour: '' }));
+      return;
+    }
+    let hour = parseInt(value);
+    if (isNaN(hour)) return;
+    // Ensure 12-hour format (1-12)
     if (hour < 1) hour = 1;
     if (hour > 12) hour = 12;
     setTime(prev => ({ ...prev, hour: hour.toString() }));
   };
 
   const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let minute = parseInt(e.target.value);
-    if (isNaN(minute)) minute = 0;
+    const value = e.target.value;
+    if (value === '') {
+      setTime(prev => ({ ...prev, minute: '' }));
+      return;
+    }
+    let minute = parseInt(value);
+    if (isNaN(minute)) return;
     if (minute < 0) minute = 0;
     if (minute > 59) minute = 59;
     setTime(prev => ({ ...prev, minute: minute.toString().padStart(2, '0') }));
@@ -52,7 +68,8 @@ export function EthiopianTimeInput({ value, onChange, disabled }: EthiopianTimeI
           value={time.hour}
           onChange={handleHourChange}
           disabled={disabled}
-          placeholder="ሰዓት"
+          placeholder="ሰዓት (1-12)"
+          className="text-center"
         />
       </div>
       <div>
@@ -65,7 +82,8 @@ export function EthiopianTimeInput({ value, onChange, disabled }: EthiopianTimeI
           value={time.minute}
           onChange={handleMinuteChange}
           disabled={disabled}
-          placeholder="ደቂቃ"
+          placeholder="ደቂቃ (0-59)"
+          className="text-center"
         />
       </div>
       <div>

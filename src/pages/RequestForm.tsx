@@ -130,6 +130,7 @@ export default function RequestForm() {
         office_name: profile?.office_name || '',
         coverage_date: gregorianDate.toISOString().split('T')[0],
         coverage_time: time24Hour,
+        ethiopian_time: formData.coverageTime, // Store original Ethiopian time format
         location: sanitizedLocation,
         agenda: sanitizedAgenda
       };
